@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import com.photobucket.model.*;
 
 @Repository
-public interface PostRepository extends JpaRepository<Post, Long>{
+public interface PostDao extends JpaRepository<Post, Long>{
 
 }

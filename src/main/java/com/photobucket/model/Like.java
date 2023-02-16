@@ -8,6 +8,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name="likes")
 public class Like {
@@ -18,24 +20,20 @@ public class Like {
 
 	    @ManyToOne
 	    @JoinColumn(name = "user_id")
+	    @JsonIgnore
 	    private User user;
 
 	    @ManyToOne
 	    @JoinColumn(name = "post_id")
 	    private Post post;
-
-		public Like( User user, Post post) {
-			super();
-			this.user = user;
-			this.post = post;
+	    
+	   
+		public void setId(Long id) {
+			this.id = id;
 		}
 
 		public Long getId() {
 			return id;
-		}
-
-		public void setId(Long id) {
-			this.id = id;
 		}
 
 		public User getUser() {
@@ -53,12 +51,6 @@ public class Like {
 		public void setPost(Post post) {
 			this.post = post;
 		}
-
-		@Override
-		public String toString() {
-			return "Like [id=" + id + ", user=" + user + ", post=" + post + "]";
-		}
+		
 	    
-	    
-
 }

@@ -1,56 +1,46 @@
-package com.photobucket.model;
+package com.photobucket.dto;
 
-import java.security.Timestamp;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.web.multipart.MultipartFile;
 
-@Entity
-@Table(name = "posts")
-public class Post {
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+import com.photobucket.model.Comment;
+import com.photobucket.model.Like;
+import com.photobucket.model.User;
+
+public class PostDto {
+
 	private long id;
 	
-	@Column(name = "title")
 	private String title;
 	
-	@Column(name = "description")
 	private String description;
 	
 	private byte[] img;
 	
-	@OneToMany(cascade = CascadeType.ALL)
-	@JoinColumn( name = "post_id", referencedColumnName = "id")
+	private MultipartFile postImg;
+	
 	List<Comment> comments = new ArrayList<>();
-
-	@ManyToOne
-	@JoinColumn(name = "user_id")
-	@JsonIgnore
+	
 	private User user;
 
-	@OneToMany(mappedBy = "post")
 	private List<Like> likes;
 	
 	private boolean isBlocked;
-	private boolean isDeleted;
+	
+	private long user_post_id;
+	
 	private LocalDateTime dateTime;
 	
 	public LocalDateTime getDateTime() {
@@ -60,21 +50,22 @@ public class Post {
 	public void setDateTime(LocalDateTime localDateTime) {
 		this.dateTime = localDateTime;
 	}
-
-	public boolean isDeleted() {
-		return isDeleted;
+	
+	
+	public long getUser_post_id() {
+		return user_post_id;
 	}
 
-	public void setDeleted(boolean isDeleted) {
-		this.isDeleted = isDeleted;
+	public void setUser_post_id(long user_post_id) {
+		this.user_post_id = user_post_id;
 	}
 
-	public List<Comment> getComments() {
-		return comments;
+	public MultipartFile getPostImg() {
+		return postImg;
 	}
 
-	public void setComments(List<Comment> comments) {
-		this.comments = comments;
+	public void setPostImg(MultipartFile postImg) {
+		this.postImg = postImg;
 	}
 	
 	public long getId() {
@@ -109,6 +100,14 @@ public class Post {
 		this.img = img;
 	}
 
+	public List<Comment> getComments() {
+		return comments;
+	}
+
+	public void setComments(List<Comment> comments) {
+		this.comments = comments;
+	}
+
 	public User getUser() {
 		return user;
 	}
@@ -124,6 +123,7 @@ public class Post {
 	public void setLikes(List<Like> likes) {
 		this.likes = likes;
 	}
+
 	public boolean isBlocked() {
 		return isBlocked;
 	}
@@ -131,7 +131,5 @@ public class Post {
 	public void setBlocked(boolean isBlocked) {
 		this.isBlocked = isBlocked;
 	}
-
-	
 	
 }

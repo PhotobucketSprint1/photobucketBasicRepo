@@ -26,19 +26,24 @@ public class Admin {
 	
 	private String email_id;
 	private String password;
+	private boolean status;
+	private String username;
+
 	
-	
-	
-	public Admin(long admin_id, String email_id, String password) {
-		super();
-		this.admin_id = admin_id;
-		this.email_id = email_id;
-		this.password = password;
+	public String getUsername() {
+		return username;
 	}
 
-	public Admin() {
-		super();
-		// TODO Auto-generated constructor stub
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public boolean isStatus() {
+		return status;
+	}
+
+	public void setStatus(boolean status) {
+		this.status = status;
 	}
 
 	public long getAdmin_id() {
@@ -63,13 +68,6 @@ public class Admin {
 
 	public void setPassword(String password) {
 		this.password = password;
-	}
-
-	@Override
-	public String toString() {
-		return "Admin [admin_id=" + admin_id + ", email_id=" + email_id + ", password=" + password + "]";
-	}
-
-	
+	}	
 
 }

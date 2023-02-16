@@ -7,6 +7,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "comments")
 public class Comment {
@@ -18,20 +20,16 @@ public class Comment {
 	
 	@ManyToOne
 	@JoinColumn(name = "user_id")
+	@JsonIgnore
 	private User user;
 	
 	@ManyToOne
 	@JoinColumn(name = "post_id")
 	private Post post;
 	
-	public Comment() {
-		
-	}
+	private boolean isBlocked;
+	private boolean isDeleted;
 	
-	public Comment(String text) {
-		super();
-		this.text = text;
-	}
 
 	public long getId() {
 		return id;
@@ -65,9 +63,20 @@ public class Comment {
 		this.post = post;
 	}
 
-	@Override
-	public String toString() {
-		return "Comment [id=" + id + ", text=" + text + ", user=" + user + ", post=" + post + "]";
+	public boolean isBlocked() {
+		return isBlocked;
+	}
+
+	public void setBlocked(boolean isBlocked) {
+		this.isBlocked = isBlocked;
 	}
 	
+	public boolean isDeleted() {
+		return isDeleted;
+	}
+
+	public void setDeleted(boolean isDeleted) {
+		this.isDeleted = isDeleted;
+	}
+
 }

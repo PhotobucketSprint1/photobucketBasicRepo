@@ -7,32 +7,24 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 public class Follower {
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @ManyToOne
+    
+	@ManyToOne
     @JoinColumn(name = "follower_id")
+	@JsonIgnore
     private User follower;
-
+    
     @ManyToOne
     @JoinColumn(name = "following_id")
+    @JsonIgnore
     private User following;
-   
-
-	public Follower() {
-
-	}
-
-	public Follower(Long id, User follower, User following) {
-		super();
-		this.id = id;
-		this.follower = follower;
-		this.following = following;
-	}
 
 	public Long getId() {
 		return id;
@@ -57,13 +49,8 @@ public class Follower {
 	public void setFollowing(User following) {
 		this.following = following;
 	}
+   
+    
 
-	@Override
-	public String toString() {
-		return "Follower [id=" + id + ", follower=" + follower + ", following=" + following + "]";
-	}
-    
-    
-	
 }
 

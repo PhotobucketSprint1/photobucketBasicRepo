@@ -1,0 +1,105 @@
+//	@PostMapping("/saveUser")
+//	public ResponseEntity<User> saveUser(@RequestBody User user){
+//		return new ResponseEntity<User>(HttpStatus.OK);
+//	}
+	
+//	@PostMapping("/upload")
+//	public ResponseEntity upload(@RequestParam("imageFile") MultipartFile img)throws IOException {
+//		System.out.println("Original Image Byte Size - " + img.getBytes().length);
+//		Post post = new Post();
+//		post.setTitle("Title");
+//		post.setDescription("Description of the image");
+//		post.setImg(img.getBytes());
+////		post.setComments();
+//		post.setUser(new User("asd","asdas","asdasd"));
+//		
+//		postRepository.save(post);
+//		return (ResponseEntity) ResponseEntity.status(HttpStatus.OK);
+//		
+//	}
+	
+//	@PostMapping("/upload")
+//	public BodyBuilder upload(@RequestParam("imageFile") MultipartFile img)throws IOException {
+//		System.out.println("Original Image Byte Size - " + img.getBytes().length);
+//		Post2 post = new Post2();
+//		post.setTitle("Second Post Title");
+//		post.setDescription("Our paris Trip CHECKOUT !!");
+//		post.setImg(img.getBytes());
+////		post.setUser(1);
+//		postRepository.save(post);
+//		return ResponseEntity.status(HttpStatus.OK);
+//	}
+//	
+//	public static byte[] compressBytes(byte[] data) {
+//		Deflater deflater = new Deflater();
+//		deflater.setInput(data);
+//		deflater.finish();
+//
+//		ByteArrayOutputStream outputStream = new ByteArrayOutputStream(data.length);
+//		byte[] buffer = new byte[1024];
+//		while (!deflater.finished()) {
+//			int count = deflater.deflate(buffer);
+//			outputStream.write(buffer, 0, count);
+//		}
+//		try {
+//			outputStream.close();
+//		} catch (IOException e) {
+//		}
+//		System.out.println("Compressed Image Byte Size - " + outputStream.toByteArray().length);
+//
+//		return outputStream.toByteArray();
+//	}
+//	public static byte[] decompressBytes(byte[] data) {
+//		Inflater inflater = new Inflater();
+//		inflater.setInput(data);
+//		ByteArrayOutputStream outputStream = new ByteArrayOutputStream(data.length);
+//		byte[] buffer = new byte[1024];
+//		try {
+//			while (!inflater.finished()) {
+//				int count = inflater.inflate(buffer);
+//				outputStream.write(buffer, 0, count);
+//			}
+//			outputStream.close();
+//		} catch (IOException ioe) {
+//		} catch (DataFormatException e) {
+//		}
+//		return outputStream.toByteArray();
+//	}
+	
+//	@GetMapping(path = { "/get/{imageName}" })
+//	public Post2 getImage(@PathVariable("imageName") String imageName) throws IOException {
+//
+//		final Optional<Post2> retrievedImage = postRepository.findByTitle(imageName);
+//		Post2 img = new Post2(retrievedImage.get().getTitle(), retrievedImage.get().getDescription(),
+//				decompressBytes(retrievedImage.get().getImg()),1);
+//		return img;
+//	}
+	
+//	@RequestParam("imageFile") MultipartFile file, @RequestParam("userid") User userid
+	
+	
+//	@PostMapping("/savePost")
+//	public ResponseEntity<PostDto> savePost(@RequestBody PostDto postDto) throws IOException {
+//		PostDto newPost = postService.savePost(postDto);	
+//		System.out.println(postDto.getTitle());
+//		System.out.println(postDto.getId());
+//		ResponseEntity<PostDto> responseEntity = new ResponseEntity<>(newPost, HttpStatus.CREATED);
+//		return responseEntity;
+//	}
+//	
+
+//	public Post uploadImage(MultipartFile file, PostDto postDto) throws IOException {
+//		Post pImage = new Post();
+//		pImage.setImg(compressImage(file.getBytes()));
+//		pImage.setDescription(postDto.getDescription());
+//		pImage.setTitle(postDto.getTitle());
+//		pImage.setUser(postDto.getUser());
+//		return postRepo.save(pImage);
+//	}
+
+//	@PostMapping("/uploadImg")
+//	public void uploadImage(@RequestParam("imgFile")MultipartFile file) throws IOException{
+//		postService.uploadImage(file);
+//		System.out.println("Image Uploaded !");
+//	}
+	

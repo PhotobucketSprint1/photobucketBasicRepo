@@ -1,48 +1,45 @@
-package com.photobucket.model;
+package com.photobucket.dto;
 
 import java.util.List;
 
 import javax.persistence.CascadeType;
-import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
-import javax.persistence.Table;
 
-@Entity
-@Table(name = "users")
-public class User {
+import org.springframework.web.multipart.MultipartFile;
+
+import com.photobucket.model.Follower;
+import com.photobucket.model.Post;
+
+public class UserDto {
 	
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
 	private String userName;
 	private String password;
 	private String emailId;
-	
-	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+		
 	private List<Post> posts;
 	
-	@OneToMany(mappedBy = "follower")
-	private List<Follower> sentRequests;
-	@OneToMany(mappedBy = "following")
-	private List<Follower> receivedRequests;
+    private List<Follower> following;
+
+    private List<Follower> followers;
     
     private boolean isDeleted;
     private byte[] profilePic;
     private String role;
-    private boolean isBlocked;
+    
+    private MultipartFile profilePicture;
     
     
-	public boolean isBlocked() {
-		return isBlocked;
+    
+	public MultipartFile getProfilePicture() {
+		return profilePicture;
 	}
-	public void setBlocked(boolean isBlocked) {
-		this.isBlocked = isBlocked;
+	public void setProfilePicture(MultipartFile profilePicture) {
+		this.profilePicture = profilePicture;
 	}
 	public long getId() {
 		return id;
@@ -74,18 +71,17 @@ public class User {
 	public void setPosts(List<Post> posts) {
 		this.posts = posts;
 	}
-	
-	public List<Follower> getSentRequests() {
-		return sentRequests;
+	public List<Follower> getFollowing() {
+		return following;
 	}
-	public void setSentRequests(List<Follower> sentRequests) {
-		this.sentRequests = sentRequests;
+	public void setFollowing(List<Follower> following) {
+		this.following = following;
 	}
-	public List<Follower> getReceivedRequests() {
-		return receivedRequests;
+	public List<Follower> getFollowers() {
+		return followers;
 	}
-	public void setReceivedRequests(List<Follower> receivedRequests) {
-		this.receivedRequests = receivedRequests;
+	public void setFollowers(List<Follower> followers) {
+		this.followers = followers;
 	}
 	public boolean isDeleted() {
 		return isDeleted;
@@ -105,7 +101,8 @@ public class User {
 	public void setRole(String role) {
 		this.role = role;
 	}
-
-   	
     
+    
+    
+
 }

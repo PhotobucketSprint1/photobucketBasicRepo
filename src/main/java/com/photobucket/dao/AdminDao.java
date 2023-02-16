@@ -9,4 +9,8 @@ import com.photobucket.model.User;
 @Repository
 public interface AdminDao extends JpaRepository<Admin, Long> {
 
+	Admin findByUsername(String username);
+
+//	Admin findByEmailId(String email_id);
+
 }
