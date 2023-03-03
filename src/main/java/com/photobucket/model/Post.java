@@ -46,7 +46,7 @@ public class Post {
 	@JsonIgnore
 	private User user;
 
-	@OneToMany(mappedBy = "post")
+	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
 	private List<Like> likes;
 	
 	private boolean isBlocked;

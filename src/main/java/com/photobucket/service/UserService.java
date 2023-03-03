@@ -21,6 +21,8 @@ import com.photobucket.dao.FollowerDao;
 import com.photobucket.dao.LikeDao;
 import com.photobucket.dao.UserDao;
 import com.photobucket.dto.UserDto;
+import com.photobucket.exception.NotFoundException;
+import com.photobucket.exception.UserNotFoundException;
 import com.photobucket.model.Admin;
 import com.photobucket.model.Comment;
 import com.photobucket.model.Follower;
@@ -55,11 +57,11 @@ public class UserService {
 		
 		 User existingUser = userDao.findByUserName(userDto.getUserName());
 	        if (existingUser != null) {
-	            throw new RuntimeException("Username already exists");
+	            throw new NotFoundException("Username already exists");
 	        }
 	        existingUser = userDao.findByEmailId(userDto.getEmailId());
 	        if (existingUser != null) {
-	            throw new RuntimeException("Email already exists");
+	            throw new NotFoundException("Email already exists");
 	        }
 		User user = new User();
 		user.setUserName(userDto.getUserName());
@@ -104,6 +106,7 @@ public class UserService {
 	   	 userDto.setUserName(user.get().getUserName());
 	   	 userDto.setId(user.get().getId());
 	   	 userDto.setProfilePic(user.get().getProfilePic());
+	   	 userDto.setPosts(user.get().getPosts());
 	   	 System.out.println("USER "+user.get().getEmailId());
 	   	 
 	   	 return new ResponseEntity<UserDto>(userDto, HttpStatus.OK);	
@@ -111,15 +114,19 @@ public class UserService {
 	
 
 
-public String editProfile(UserDto userDto){
+public String editProfile(UserDto userDto, long userid){
     
-		Optional<User> user = userDao.findById(userDto.getId());
+		Optional<User> user = userDao.findById(userid);
+		if(user.isEmpty()) {
+			throw new NotFoundException("User Not Present");
+		}
 		if(user.get().isBlocked()) {
 	   		return "Admin blocked your profile you are Unable to edit profile";
 			
 	   	 }
 		user.get().setEmailId(userDto.getEmailId());
-	    user.get().setPassword(userDto.getPassword());
+		user.get().setUserName(userDto.getUserName());
+//	    user.get().setPassword(userDto.getPassword());
 		userDao.save(user.get());
 		return "Details are updated";
 	}
@@ -127,7 +134,9 @@ public String editProfile(UserDto userDto){
 public ResponseEntity<?> addProfilePic(MultipartFile img, long id) throws IOException {
 	 
 	 Optional<User> user = userDao.findById(id);
-
+	 if(user.isEmpty()) {
+		 throw new NotFoundException("User Not Found !");
+	 }
 	 if(user.get().isBlocked()) {
 	   		return new ResponseEntity<String>("Admin blocked your profile", HttpStatus.OK);
 	  }
@@ -195,28 +204,40 @@ public List<User> getFollowing(User user) {
 }
 
 public ResponseEntity<?> addComment(Comment comment, long postId, long userId)  {
-	Post post = postRepo.findById(postId).get();
-	User user = userDao.findById(userId).get();
-
-	List<Comment> cms = post.getComments();
-	cms.add(comment);
+	Optional<Post> post = postRepo.findById(postId);
+	Optional<User> user = userDao.findById(userId);
+	
+	if(post.isEmpty()) {
+		throw new NotFoundException("Post Not Found !");
+	}else if(user.isEmpty()) {
+		throw new NotFoundException("User not found !");
+	}
+	
+	List<Comment> cms = post.get().getComments();
+//	cms.add(comment);	
 	Comment com = new Comment();
-	com.setPost(post);
-	com.setUser(user);
+	com.setPost(post.get());
+	com.setUser(user.get());
 	com.setText(comment.getText());
 	cms.add(com);
-	post.setComments(cms);
+	post.get().setComments(cms);
 	commentRepo.save(com);
 	return new ResponseEntity<String>("",HttpStatus.OK);
 	
 }
 
 	public ResponseEntity<?> likePost(long postId,long userId) {
-		User user=userDao.findById(userId).get();
-		Post post=postRepo.findById(postId).get();
+		Optional<User> user=userDao.findById(userId);
+		Optional<Post> post=postRepo.findById(postId);
+		if(user.isEmpty()) {
+			throw new NotFoundException("User Not Found !");
+		}else if(post.isEmpty()) {
+			throw new NotFoundException("Post Not Found !");
+		}
+		
 		Like like=new Like();
-		like.setPost(post);
-		like.setUser(user);
+		like.setPost(post.get());
+		like.setUser(user.get());
 		likeDao.save(like);
 		return new ResponseEntity<String>("",HttpStatus.OK);
 	}

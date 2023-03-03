@@ -1,6 +1,7 @@
 package com.photobucket.model;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -18,13 +19,14 @@ public class Like {
 	 @GeneratedValue(strategy = GenerationType.IDENTITY)
 	    private Long id;
 
-	    @ManyToOne
+	    @ManyToOne(fetch = FetchType.LAZY)
 	    @JoinColumn(name = "user_id")
 	    @JsonIgnore
 	    private User user;
 
-	    @ManyToOne
+	    @ManyToOne(fetch = FetchType.LAZY)
 	    @JoinColumn(name = "post_id")
+	    @JsonIgnore
 	    private Post post;
 	    
 	   
@@ -51,6 +53,5 @@ public class Like {
 		public void setPost(Post post) {
 			this.post = post;
 		}
-		
-	    
+			    
 }

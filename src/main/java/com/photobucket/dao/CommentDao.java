@@ -7,8 +7,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import com.photobucket.model.*;
+
 @Repository
 public interface CommentDao extends JpaRepository<Comment, Long>{
 	@Query(value="select * from comments where post_id= :postId",nativeQuery = true)
 	public List<Comment>searchCommentsByPost(@Param("postId") long postId);
+	
+	
+	List<Comment> findByPostId(long postId);
+//	List<Like> findLikes(long postId);
 }

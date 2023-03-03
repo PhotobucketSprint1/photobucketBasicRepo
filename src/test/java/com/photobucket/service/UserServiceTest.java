@@ -43,8 +43,9 @@ class UserServiceTest {
 	@Test
 	void testEditProfile() {	
 		    UserDto userDto = new UserDto();	   
-		    userDto.setId(1);
-		    String result = userService.editProfile(userDto);
+		    
+		    long userid = 1;
+		    String result = userService.editProfile(userDto, userid);
 		    assertEquals("Details are updated", result);
 	}
 

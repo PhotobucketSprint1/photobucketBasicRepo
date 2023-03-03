@@ -22,6 +22,7 @@ import com.photobucket.model.Admin;
 import com.photobucket.model.Comment;
 import com.photobucket.model.Post;
 import com.photobucket.model.User;
+import com.photobucket.exception.*;
 
 @Service
 public class AdminService {
@@ -39,15 +40,28 @@ public class AdminService {
 	CommentDao commentRepo;
 	
 	public ResponseEntity<?> viewPostDetails(){
-	    List<Post> postList = new ArrayList<>();
-	    postList=postRepo.findAll();
-	    System.out.println(postList.toString());
-	  	ResponseEntity<List<Post>> responseEntity = new ResponseEntity<>(postList,HttpStatus.OK);
-			return responseEntity;
+	    List<Post> postList = postRepo.findAll();
+	    List<Post> newPostList = new ArrayList<>();
+	    
+	    postList.forEach((iPost)->{
+	    	Post eachPost = new Post();
+	    	eachPost.setTitle(iPost.getTitle());
+	    	eachPost.setDescription(iPost.getDescription());
+	    	eachPost.setImg(iPost.getImg());
+	    	eachPost.setId(iPost.getId());
+	    	eachPost.setComments(iPost.getComments());
+	    	eachPost.setLikes(iPost.getLikes());
+	    	newPostList.add(eachPost);
+	    });
+	    
+	    return new ResponseEntity<>(newPostList,HttpStatus.OK);
 	}
 	
 	public ResponseEntity<?> blockUser(UserDto userDto){
 		Optional<User> user = userDao.findById(userDto.getId());
+		if(user.isEmpty()) {
+			throw new NotFoundException("User Not Found !");
+		}
 		user.get().setBlocked(true);
 		userDao.save(user.get());
 		System.out.println(user.get().getUserName());
@@ -56,6 +70,9 @@ public class AdminService {
 	
 	public ResponseEntity<?> unblockUser(UserDto userDto){
 		Optional<User> user = userDao.findById(userDto.getId());
+		if(user.isEmpty()) {
+			throw new NotFoundException("User Not Found !");
+		}
 		user.get().setBlocked(false);
 		userDao.save(user.get());
 		System.out.println(user.get().getUserName());
@@ -65,6 +82,9 @@ public class AdminService {
 	public ResponseEntity<?> blockComment(CommentDto commentDto){
 		
 		Optional<Comment> comment = commentRepo.findById(commentDto.getId());
+		if(comment.isEmpty()) {
+			throw new NotFoundException("Comment Not Found !");
+		}
 		comment.get().setBlocked(true);
 		commentRepo.save(comment.get());
 		System.out.println(comment.get().getText());
@@ -73,6 +93,9 @@ public class AdminService {
 	
 	public ResponseEntity<?> unblockComment( CommentDto commentDto){
 		Optional<Comment> comment = commentRepo.findById(commentDto.getId());
+		if(comment.isEmpty()) {
+			throw new NotFoundException("Comment Not Found !");
+		}
 		comment.get().setBlocked(false);
 		commentRepo.save(comment.get());
 		System.out.println(comment.get().getText());
@@ -81,6 +104,9 @@ public class AdminService {
 	
 	public ResponseEntity<?> blockPost(PostDto postDto){	
 		Optional<Post> post = postRepo.findById(postDto.getId());
+		if(post.isEmpty()) {
+			throw new NotFoundException("Post Not Found !");
+		}
 		post.get().setBlocked(true);
 		postRepo.save(post.get());
 		System.out.println(post.get().getDescription());
@@ -89,6 +115,9 @@ public class AdminService {
 	
 	public ResponseEntity<?> unblockPost(PostDto postDto){
     	Optional<Post> post = postRepo.findById(postDto.getId());
+    	if(post.isEmpty()) {
+			throw new NotFoundException("Post Not Found !");
+		}
    		post.get().setBlocked(false);
    		postRepo.save(post.get());
    		System.out.println(post.get().getDescription());
@@ -96,13 +125,23 @@ public class AdminService {
    	}
 	
 	public ResponseEntity<?> findAllUser(){
-		return new ResponseEntity<List<User>>(userDao.findAll(), HttpStatus.OK);
+		List<User> userList = userDao.findAll();
+		List<User> newList = new ArrayList<>();
+		userList.forEach((iUser)->{
+			User eachUser = new User();
+			eachUser.setEmailId(iUser.getEmailId());
+			eachUser.setUserName(iUser.getUserName());
+			eachUser.setId(iUser.getId());
+			eachUser.setProfilePic(iUser.getProfilePic());
+			newList.add(eachUser);
+		});
+		return new ResponseEntity<List<User>>(newList, HttpStatus.OK);
 	}
 	
 	public String createAdmin(AdminDto adminDto) {
 		Admin existingAdmin = adminDao.findByUsername(adminDto.getUsername());
         if (existingAdmin != null) {
-            throw new RuntimeException("Username already exists");
+            throw new UsernameAlreadyPresentException("Username already exists");
         }
         
 		Admin admin= new Admin();

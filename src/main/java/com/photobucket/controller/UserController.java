@@ -10,7 +10,9 @@ import java.util.zip.Inflater;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -40,8 +42,10 @@ import com.photobucket.service.PostService;
 import com.photobucket.service.PostServiceException;
 import com.photobucket.service.UserService;
 
+
 @RestController
 @RequestMapping("/user")
+@CrossOrigin(origins = "*")
 public class UserController {
 	
 	@Autowired
@@ -59,6 +63,11 @@ public class UserController {
 	@GetMapping("/homepage")
 	public String welcomeMsg() {
 		return "WELCOME TO PHOTO Bucket !";
+	}
+	@PostMapping(path="/addUser", consumes={MediaType.ALL_VALUE})
+	public String addPet(User user) {
+		userDao.save(user);
+		return "ADDED User";
 	}
 
 	@PostMapping("/registerUser")
@@ -81,8 +90,8 @@ public class UserController {
 	
 	@PostMapping("/createPost")
 	 public ResponseEntity<?> createPost(@ModelAttribute PostDto postDto) throws IOException, PostServiceException {
-       postService.addPost(postDto);
-		return new ResponseEntity<String>("Post Created", HttpStatus.CREATED);
+		return postService.addPost(postDto);
+
    }
 	
 	@PutMapping("/changePostPicture/{postid}")
@@ -108,14 +117,24 @@ public class UserController {
     }
 	
 	@PutMapping("/editprofile/{userid}")
-	public String editProfileController(@RequestBody UserDto userDto){		
-		return userService.editProfile(userDto);
+	public String editProfileController(@RequestBody UserDto userDto, @PathVariable long userid){		
+		return userService.editProfile(userDto, userid);
 	}
 	
 	@PostMapping("/{userid}/addProfilePic")
 	 public ResponseEntity<?> addProfilePic(@RequestParam("img") MultipartFile img, @PathVariable("userid") long userid) throws IOException{
 		 return userService.addProfilePic(img, userid);
 	 }
+	
+	@GetMapping("/getPostsByUser/{userId}")
+    public List<PostDto> getPostsByUser(@PathVariable long userId) {
+        return postService.getPostsByUser(userId);
+    }
+	
+	@GetMapping("/getPostImage/{postId}")
+    public PostDto getPostImage(@PathVariable long postId) {
+        return postService.getPostImage(postId);
+    }
 	
 	@PostMapping("/{followerId}/follow/{followingId}")
     public ResponseEntity<?> follow(@PathVariable Long followerId, @PathVariable Long followingId) {
@@ -177,5 +196,9 @@ public class UserController {
 //		return new ResponseEntity<String>("Friend Request Accepted ", HttpStatus.OK);
 	}
 	
+	@GetMapping("/getUserByUsername/{username}")
+    public long getUserByUserName(@PathVariable String username) {
+        return postService.getUser(username);
+    }
 	
 }

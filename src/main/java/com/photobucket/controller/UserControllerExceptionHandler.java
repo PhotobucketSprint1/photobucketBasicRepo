@@ -5,6 +5,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import com.photobucket.exception.NotFoundException;
+import com.photobucket.exception.UserNotFoundException;
 import com.photobucket.service.PostServiceException;
 
 @ControllerAdvice
@@ -14,11 +16,11 @@ public class UserControllerExceptionHandler {
     public ResponseEntity<?> imgNotPresent(){
 		return new ResponseEntity<>("Please Fill Up All Details",HttpStatus.EXPECTATION_FAILED);
     }
-
-	@ExceptionHandler(value= {java.util.NoSuchElementException.class})
-	public ResponseEntity<?> exceptionHandler(){
-		return new ResponseEntity<>("No Records Found !", HttpStatus.EXPECTATION_FAILED);
-	}
+//
+//	@ExceptionHandler(value= {java.util.NoSuchElementException.class})
+//	public ResponseEntity<?> exceptionHandler(){
+//		return new ResponseEntity<>("No Records Found !", HttpStatus.EXPECTATION_FAILED);
+//	}
 
 	@ExceptionHandler(value= {PostServiceException.class})
 	public ResponseEntity<?> customExceptionHandler(PostServiceException postServiceException)
@@ -52,5 +54,17 @@ public class UserControllerExceptionHandler {
     public ResponseEntity<?> sendUniqueExcep(){
 		return new ResponseEntity<>("Already Present",HttpStatus.EXPECTATION_FAILED);
     }
+	
+	@ExceptionHandler(value = {com.photobucket.exception.UserNotFoundException.class})
+    public ResponseEntity<?> userNot(UserNotFoundException obj){
+		return new ResponseEntity<>(obj.getMessage(),HttpStatus.EXPECTATION_FAILED);
+    }
+	
+	@ExceptionHandler(value = {com.photobucket.exception.NotFoundException.class})
+    public ResponseEntity<?> notFoundException(NotFoundException obj){
+		return new ResponseEntity<>(obj.getMessage(),HttpStatus.EXPECTATION_FAILED);
+    }
+	
+	
 	
 }
