@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import com.photobucket.exception.FriendRequestAlreadySent;
 import com.photobucket.exception.NotFoundException;
 import com.photobucket.exception.UserNotFoundException;
 import com.photobucket.service.PostServiceException;
@@ -65,6 +66,9 @@ public class UserControllerExceptionHandler {
 		return new ResponseEntity<>(obj.getMessage(),HttpStatus.EXPECTATION_FAILED);
     }
 	
-	
+	@ExceptionHandler(value = {com.photobucket.exception.FriendRequestAlreadySent.class})
+    public ResponseEntity<?> notFoundException(FriendRequestAlreadySent obj){
+		return new ResponseEntity<>(obj.getMessage(),HttpStatus.EXPECTATION_FAILED);
+    }
 	
 }

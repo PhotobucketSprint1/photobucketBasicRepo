@@ -27,9 +27,11 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.ResponseEntity.BodyBuilder;
 
 import com.photobucket.dao.FollowerDao;
+import com.photobucket.dao.FriendReqDao;
 import com.photobucket.dao.PostDao;
 
 import com.photobucket.dao.UserDao;
+import com.photobucket.dto.FriendReqDto;
 import com.photobucket.dto.PostDto;
 import com.photobucket.dto.UserDto;
 import com.photobucket.model.Comment;
@@ -57,6 +59,12 @@ public class UserController {
 	@Autowired
 	UserDao userDao;
 	
+	@Autowired
+	FriendReqDao friendReqRepo;
+	
+	@Autowired
+	PostDao postDao;
+	
 	 @Autowired
 	    private FollowerDao followerRepository;
 
@@ -78,11 +86,15 @@ public class UserController {
 	
 	@PostMapping("/login")
 	 public ResponseEntity<String> login(@RequestBody User loginCredentials){
+		
+		if(userService.isUserBlocked(loginCredentials.getUserName(), loginCredentials.getPassword())) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Your Profile Is Blocked By Admin");
+		}
+			
 		if (userService.validateUser(loginCredentials.getUserName(), loginCredentials.getPassword()))
 		{
 			return ResponseEntity.ok("Login successful.");
-		} 
-		else
+		}else
 		{
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid crdentials");
 		}
@@ -164,14 +176,7 @@ public class UserController {
     
     @PutMapping("/likePost/{postId}/{userId}")
 	public ResponseEntity<?> likePost(@PathVariable long postId,@PathVariable long userId ) {
-		userService.likePost(postId,userId);
-		return new ResponseEntity<String>("Your Like is added.. to Post Id : "+postId, HttpStatus.OK);
-	}
-    
-    @PostMapping("/sendFriendRequest")
-	public ResponseEntity<?> sendFriendRequest(@RequestBody FriendReq req){
-		userService.sendFriendRequest(req);
-		return new ResponseEntity<String>("Friend Request Sent ", HttpStatus.OK);
+		return userService.likePost(postId,userId);
 	}
 	
 	@PutMapping("/acceptFriendRequest")
@@ -190,15 +195,69 @@ public class UserController {
 		return userService.getFollowers(user);
 	}
 	
-	@GetMapping("/getComments/{postId}")
-	public ResponseEntity<?> viewLikes(@PathVariable long postId){
-		return userService.getComments(postId);
-//		return new ResponseEntity<String>("Friend Request Accepted ", HttpStatus.OK);
-	}
 	
 	@GetMapping("/getUserByUsername/{username}")
     public long getUserByUserName(@PathVariable String username) {
         return postService.getUser(username);
     }
 	
+	@GetMapping("/getCommentsWithUsername")
+	   public ResponseEntity<?> getcomment(){
+		   return userService.getCommentsWithUserDetails();
+	   }
+	
+	@GetMapping("{postId}/getLikes")
+    public ResponseEntity<?>getlikes(@PathVariable long postId){
+    	return userService.getLikes(postId);
+    }
+	
+	@GetMapping("/following-users")
+    public ResponseEntity<List<Post>> getFollowingUsersPosts(@RequestParam("userId") Long userId) {
+        List<Post> posts = postService.getFollowingUsersPosts(userId);
+
+        return ResponseEntity.ok(posts);
+    }
+	
+	
+	  @PostMapping("/{senderId}/sendFriendRequest/{receiverId}")
+	    public ResponseEntity<FriendReq> sendFriendRequest(@PathVariable Long senderId, @PathVariable Long receiverId) {
+		  FriendReq friendRequest = userService.sendFriendRequest(senderId, receiverId);
+	        return ResponseEntity.ok(friendRequest);
+	    }
+	  
+	 
+	  @GetMapping("/pendingRequest/{receiverId}")
+	    public ResponseEntity<List<FriendReqDto>> getPendingFriendRequests(@PathVariable Long receiverId) {
+	        List<FriendReqDto> pendingRequests = userService.getPendingFriendRequests(receiverId);
+	        return ResponseEntity.ok(pendingRequests);
+	   }
+	  
+	  @PostMapping("/acceptFriendRequest/{senderId}/{recieverId}")
+	    public ResponseEntity<?> acceptFriendRequest(@PathVariable Long senderId, @PathVariable Long recieverId) {
+		  userService.acceptFriendRequest(senderId,recieverId);
+		  return new ResponseEntity<String>("Friend Request Accepted ", HttpStatus.OK);
+	    }
+	  
+	  @GetMapping("/getFriends/{userId}")
+	    public ResponseEntity<List<User>> getFriends(@PathVariable Long userId) {
+		  	User user = new User();
+	        user.setId(userId);
+	        List<User> friends = userService.getFriends(user);
+	        return ResponseEntity.ok(friends);
+	    }
+	  
+
+	  @GetMapping("/friendsPosts/{userId}")
+	    public List<List<Post>> getPostsForAcceptedFriends(@PathVariable Long userId) {
+	        User user = new User();
+	        user.setId(userId);
+	        return userService.getAcceptedFriends(user);
+	        
+	    }
+	  
+	  @GetMapping("/getCommentsForPost/{postId}")
+	   public ResponseEntity<?> getcomment(@PathVariable Long postId){
+		   return userService.getCommentForPostWithDetails(postId);
+	   }
+	  
 }

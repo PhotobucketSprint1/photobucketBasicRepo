@@ -41,15 +41,17 @@ public class AdminService {
 	
 	public ResponseEntity<?> viewPostDetails(){
 	    List<Post> postList = postRepo.findAll();
-	    List<Post> newPostList = new ArrayList<>();
+	    List<PostDto> newPostList = new ArrayList<>();
 	    
 	    postList.forEach((iPost)->{
-	    	Post eachPost = new Post();
+	    	PostDto eachPost = new PostDto();
 	    	eachPost.setTitle(iPost.getTitle());
 	    	eachPost.setDescription(iPost.getDescription());
-	    	eachPost.setImg(iPost.getImg());
+//	    	eachPost.setImg(iPost.getImg());
 	    	eachPost.setId(iPost.getId());
 	    	eachPost.setComments(iPost.getComments());
+	    	eachPost.setUser(iPost.getUser());
+	    	eachPost.setUsername(iPost.getUser().getUserName());
 	    	eachPost.setLikes(iPost.getLikes());
 	    	newPostList.add(eachPost);
 	    });
@@ -131,6 +133,18 @@ public class AdminService {
 			User eachUser = new User();
 			eachUser.setEmailId(iUser.getEmailId());
 			eachUser.setUserName(iUser.getUserName());
+			eachUser.setId(iUser.getId());
+			eachUser.setProfilePic(iUser.getProfilePic());
+			newList.add(eachUser);
+		});
+		return new ResponseEntity<List<User>>(newList, HttpStatus.OK);
+	}
+	
+	public ResponseEntity<?> findAllUserImage(){
+		List<User> userList = userDao.findAll();
+		List<User> newList = new ArrayList<>();
+		userList.forEach((iUser)->{
+			User eachUser = new User();
 			eachUser.setId(iUser.getId());
 			eachUser.setProfilePic(iUser.getProfilePic());
 			newList.add(eachUser);

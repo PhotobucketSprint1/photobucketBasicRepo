@@ -210,4 +210,9 @@ public class PostService {
 		return user.getId();
 	}
 	
+	
+	public List<Post> getFollowingUsersPosts(Long userId) {
+        return postRepo.findPostsOfFollowingUsers(userId);
+    }
+	
 }

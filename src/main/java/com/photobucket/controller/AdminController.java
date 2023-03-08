@@ -62,6 +62,10 @@ public class AdminController {
 	public ResponseEntity<?> getAllUser(){
 		return adminService.findAllUser();
 	}
+	@GetMapping("/allUserImages")
+	public ResponseEntity<?> getAllUserImages(){
+		return adminService.findAllUserImage();
+	}
 	
 	@GetMapping("/viewPostDetails")
 	public ResponseEntity<?> viewPostDetails(){

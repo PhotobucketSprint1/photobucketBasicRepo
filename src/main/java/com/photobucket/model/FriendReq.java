@@ -4,7 +4,9 @@ package com.photobucket.model;
 
 
 	import javax.persistence.Entity;
-	import javax.persistence.GeneratedValue;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
 	import javax.persistence.GenerationType;
 	import javax.persistence.Id;
 	import javax.persistence.JoinColumn;
@@ -18,6 +20,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 	import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 	import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 	import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import com.photobucket.enus.RequestStatus;
 
 	@Entity
 	@Table(name="friend_req")
@@ -37,61 +40,112 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 		@JsonIgnore
 		private User reciever;
 		
-		//@JsonDeserialize(using = LocalDateDeserializer.class)
-		//@JsonSerialize(using = LocalDateSerializer.class)
-		//@JsonFormat(shape=JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd") //2021-01-29
 		private LocalDate reqDate;
 		
-		private boolean isAccepted;
-		private String status;
+		
+
+		@Enumerated(EnumType.STRING)
+		 private RequestStatus status;
+
 
 
 		public int getFriendReqId() {
 			return friendReqId;
 		}
 
+
+
 		public void setFriendReqId(int friendReqId) {
 			this.friendReqId = friendReqId;
 		}
+
+
 
 		public User getSender() {
 			return sender;
 		}
 
+
+
 		public void setSender(User sender) {
 			this.sender = sender;
 		}
+
+
 
 		public User getReciever() {
 			return reciever;
 		}
 
+
+
 		public void setReciever(User reciever) {
 			this.reciever = reciever;
 		}
+
+
 
 		public LocalDate getReqDate() {
 			return reqDate;
 		}
 
+
+
 		public void setReqDate(LocalDate reqDate) {
 			this.reqDate = reqDate;
 		}
 
-		public boolean isAccepted() {
-			return isAccepted;
-		}
 
-		public void setAccepted(boolean isAccepted) {
-			this.isAccepted = isAccepted;
-		}
 
-		public String getStatus() {
+		public RequestStatus getStatus() {
 			return status;
 		}
 
-		public void setStatus(String status) {
+
+
+		public void setStatus(RequestStatus status) {
 			this.status = status;
 		}
+		 
+//		 public RequestStatus getStatus() {
+//				return status;
+//			}
+//
+//			public void setStatus(RequestStatus status) {
+//				this.status = status;
+//			}
+//
+//		public int getFriendReqId() {
+//			return friendReqId;
+//		}
+//
+//		public void setFriendReqId(int friendReqId) {
+//			this.friendReqId = friendReqId;
+//		}
+//
+//		public User getSender() {
+//			return sender;
+//		}
+//
+//		public void setSender(User sender) {
+//			this.sender = sender;
+//		}
+//
+//		public User getReciever() {
+//			return reciever;
+//		}
+//
+//		public void setReceiver(User reciever) {
+//			this.reciever = reciever;
+//		}
+//
+//		public LocalDate getReqDate() {
+//			return reqDate;
+//		}
+//
+//		public void setReqDate(LocalDate reqDate) {
+//			this.reqDate = reqDate;
+//		}
 
 }
+	

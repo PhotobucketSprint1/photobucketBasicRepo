@@ -6,7 +6,10 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.zip.Deflater;
+
+import javax.persistence.EntityNotFoundException;
 
 import org.apache.catalina.connector.Response;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +23,11 @@ import com.photobucket.dao.CommentDao;
 import com.photobucket.dao.FollowerDao;
 import com.photobucket.dao.LikeDao;
 import com.photobucket.dao.UserDao;
+import com.photobucket.dto.CommentDto;
+import com.photobucket.dto.FriendReqDto;
 import com.photobucket.dto.UserDto;
+import com.photobucket.enus.RequestStatus;
+import com.photobucket.exception.FriendRequestAlreadySent;
 import com.photobucket.exception.NotFoundException;
 import com.photobucket.exception.UserNotFoundException;
 import com.photobucket.model.Admin;
@@ -154,12 +161,23 @@ public ResponseEntity<?> addProfilePic(MultipartFile img, long id) throws IOExce
 
 public boolean validateUser(String username, String password)  {
 	User user = userDao.findByUserName(username);
-	if (user != null&&user.getPassword().equals(password)&&user.getUserName().equals(username))
+	if (user != null && user.getPassword().equals(password) && user.getUserName().equals(username))
 	{ 
 	   return true;
 	}	
 	return false;
 }
+
+public boolean isUserBlocked(String username, String password)  {
+	User user = userDao.findByUserName(username);
+	if ( user.isBlocked())
+	{ 
+	   return true;
+	}	
+	return false;
+}
+
+
 
 public void follow(User follower, User following) {
     if (follower.getId()==following.getId()) {
@@ -227,6 +245,9 @@ public ResponseEntity<?> addComment(Comment comment, long postId, long userId)  
 }
 
 	public ResponseEntity<?> likePost(long postId,long userId) {
+		
+		
+		List<Like> likes = likeDao.findByPostIdAndUserId(postId, userId);
 		Optional<User> user=userDao.findById(userId);
 		Optional<Post> post=postRepo.findById(postId);
 		if(user.isEmpty()) {
@@ -234,28 +255,24 @@ public ResponseEntity<?> addComment(Comment comment, long postId, long userId)  
 		}else if(post.isEmpty()) {
 			throw new NotFoundException("Post Not Found !");
 		}
-		
-		Like like=new Like();
-		like.setPost(post.get());
-		like.setUser(user.get());
-		likeDao.save(like);
-		return new ResponseEntity<String>("",HttpStatus.OK);
+		 if (likes.isEmpty()) {
+	            Like like = new Like();
+	            like.setPost(post.get());
+	            like.setUser(user.get());
+	            likeDao.save(like);
+	        }else {
+	        	return new ResponseEntity<String>("You Alreday Liked This Post",HttpStatus.EXPECTATION_FAILED);
+	        	
+	        }
+		return new ResponseEntity<String>("You Liked Post With Id "+postId,HttpStatus.OK);
 	}
 	
-	public FriendReq sendFriendRequest(FriendReq req) {
-		FriendReq newReq = new FriendReq();
-		System.out.println(req.getSender());
-		newReq.setSender(req.getSender());
-		newReq.setReciever(req.getReciever());
-		newReq.setReqDate(LocalDate.now());
-		friendReqDao.save(newReq);
-		return newReq;
-	}
+
 
 	public FriendReq acceptFriendRequest(FriendReq req) {
 	FriendReq bean = friendReqDao.findById(req.getFriendReqId()).get();
-		bean.setAccepted(true);
-		bean.setStatus("Accepted");
+//		bean.setAccepted(true);
+//		bean.setStatus("Accepted");
 		friendReqDao.save(bean);
 		return bean;
 	}
@@ -266,7 +283,148 @@ public ResponseEntity<?> addComment(Comment comment, long postId, long userId)  
 	
 	public ResponseEntity<?> getComments(long postId){
 		List<Comment> comList = commentRepo.searchCommentsByPost(postId);
-		return new ResponseEntity<List<Comment>>(comList,HttpStatus.OK);
+		List<CommentDto> comDtoList = new ArrayList<>();
+		for(Comment com : comList) {
+			CommentDto commentDto = new CommentDto();
+			commentDto.setId(com.getId());
+			commentDto.setText(com.getText());
+			commentDto.setUser(com.getUser());
+			comDtoList.add(commentDto);
+		}
+		return new ResponseEntity<List<CommentDto>>(comDtoList,HttpStatus.OK);
 	}
+	
+	public ResponseEntity<?>getLikes(long postId){
+    	List<Like> likeList= likeDao.searchLikesByPost(postId);
+    	return new ResponseEntity<List<Like>>(likeList,HttpStatus.OK);
+    }
+	
+	
+	public FriendReq sendFriendRequest(Long senderId, Long receiverId) {
+        User sender = userDao.findById(senderId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + senderId));
+        User receiver = userDao.findById(receiverId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + receiverId));
 
+        Optional<FriendReq> existingRequest = friendReqDao.findBySenderAndReciever(sender, receiver);
+        if (existingRequest.isPresent()) {
+            throw new FriendRequestAlreadySent("Friend request already sent");
+        }
+
+        FriendReq friendRequest = new FriendReq();
+        friendRequest.setSender(sender);
+        friendRequest.setReciever(receiver);
+        friendRequest.setReqDate(LocalDate.now());
+        friendRequest.setStatus(RequestStatus.PENDING);	
+        return friendReqDao.save(friendRequest);
+    }
+
+	
+//	public List<FriendReq> getPendingFriendRequests(Long receiverId) {
+//        User receiver = userDao.findById(receiverId)
+//                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + receiverId));
+//
+//        return friendReqDao.findByRecieverAndStatus(receiver, RequestStatus.PENDING);
+//    }
+//	
+	public List<FriendReqDto> getPendingFriendRequests(Long receiverId) {
+        User receiver = userDao.findById(receiverId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + receiverId));
+
+        List<FriendReq> pendingRequests = friendReqDao.findByRecieverAndStatus(receiver, RequestStatus.PENDING);
+
+        List<FriendReqDto> friendRequestDTOs = new ArrayList<>();
+        for (FriendReq request : pendingRequests) {
+        	FriendReqDto friendRequestDTO = new FriendReqDto();
+            friendRequestDTO.setSender(request.getSender());
+            friendRequestDTO.setStatus(request.getStatus());
+            friendRequestDTOs.add(friendRequestDTO);
+        }
+        return friendRequestDTOs;
+    }
+	
+	public void acceptFriendRequest(Long senderId, Long receiverId) {
+		User sender = userDao.findById(senderId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + senderId));
+        User receiver = userDao.findById(receiverId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + receiverId));
+        Optional<FriendReq> friendRequest = friendReqDao.findBySenderAndReciever(sender, receiver);
+        friendRequest.get().setStatus(RequestStatus.ACCEPTED);
+        friendReqDao.save(friendRequest.get());
+    }
+	
+
+	
+	public List<User> getFriends(User user) {
+        List<FriendReq> friendRequests = friendReqDao.findByRecieverAndStatus(user, RequestStatus.ACCEPTED);
+        List<User> friends = new ArrayList<>();
+        for (FriendReq friendRequest : friendRequests) {
+            if (friendRequest.getSender().equals(user)) {
+                friends.add(friendRequest.getReciever());
+            } else {
+                friends.add(friendRequest.getSender());
+            }
+        }
+        return friends;
+    }
+	
+	public List<List<Post>> getAcceptedFriends(User user) {
+		 List<FriendReq> friendRequests = friendReqDao.findByRecieverAndStatus(user, RequestStatus.ACCEPTED);
+		 List<User> friends = new ArrayList<>();
+		 for (FriendReq friendRequest : friendRequests) {
+	            if (friendRequest.getSender().equals(user)) {
+	                friends.add(friendRequest.getReciever());
+	            } else {
+	                friends.add(friendRequest.getSender());
+	            }
+	        }
+		 
+		 List<List<Post>> posts = new ArrayList<>();
+		 for(User fri : friends) {
+			 posts.add(postRepo.findByUserId(fri.getId())); 
+		 }
+		 
+		 return posts;
+    }
+	
+	public User getUserById(Long id) {
+        return userDao.findById(id).orElseThrow(() -> new EntityNotFoundException("User not found"));
+    }
+	
+	 public ResponseEntity<?> getCommentsWithUserDetails() {
+	        List<Comment> comments = commentRepo.findAll();
+	        List<CommentDto> commentDtos = new ArrayList<>();
+
+	        for (Comment comment : comments) {
+	            CommentDto commentDto = new CommentDto();
+	            commentDto.setText(comment.getText());
+	            User user = getUserById(comment.getUser().getId());
+	            commentDto.setUsername(user.getUserName());
+	            commentDto.setBlocked(comment.isBlocked());
+	            commentDtos.add(commentDto);
+	        }
+
+	        return new ResponseEntity<List<CommentDto>>(commentDtos,HttpStatus.OK);
+	    }
+	
+	 public ResponseEntity<?> getCommentForPostWithDetails(Long postId) {
+	        List<Comment> comments = commentRepo.findByPostId(postId);
+	        List<CommentDto> commentDtos = new ArrayList<>();
+
+	        for (Comment comment : comments) {
+//	        	if(comment.getPost().getId() != postId) {
+//	        		return new ResponseEntity<String>("No Comments for this post",HttpStatus.EXPECTATION_FAILED);
+//	        	}
+	            CommentDto commentDto = new CommentDto();
+	            commentDto.setText(comment.getText());
+	            User user = getUserById(comment.getUser().getId());
+	            commentDto.setUsername(user.getUserName());
+	            commentDto.setBlocked(comment.isBlocked());
+	            commentDto.setId(comment.getId());
+	            commentDtos.add(commentDto);
+	        }
+
+	        return new ResponseEntity<List<CommentDto>>(commentDtos,HttpStatus.OK);
+	    }
+	
 }
