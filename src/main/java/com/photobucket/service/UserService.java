@@ -61,7 +61,6 @@ public class UserService {
 	
 	
 	public ResponseEntity<?> createUser(UserDto userDto) throws IOException {
-		
 		 User existingUser = userDao.findByUserName(userDto.getUserName());
 	        if (existingUser != null) {
 	            throw new NotFoundException("Username already exists");
@@ -124,13 +123,9 @@ public class UserService {
 public String editProfile(UserDto userDto, long userid){
     
 		Optional<User> user = userDao.findById(userid);
-		if(user.isEmpty()) {
+		if(!user.isPresent()) {
 			throw new NotFoundException("User Not Present");
 		}
-		if(user.get().isBlocked()) {
-	   		return "Admin blocked your profile you are Unable to edit profile";
-			
-	   	 }
 		user.get().setEmailId(userDto.getEmailId());
 		user.get().setUserName(userDto.getUserName());
 //	    user.get().setPassword(userDto.getPassword());
@@ -141,12 +136,9 @@ public String editProfile(UserDto userDto, long userid){
 public ResponseEntity<?> addProfilePic(MultipartFile img, long id) throws IOException {
 	 
 	 Optional<User> user = userDao.findById(id);
-	 if(user.isEmpty()) {
+	 if(!user.isPresent()) {
 		 throw new NotFoundException("User Not Found !");
 	 }
-	 if(user.get().isBlocked()) {
-	   		return new ResponseEntity<String>("Admin blocked your profile", HttpStatus.OK);
-	  }
 	 if(img.getSize() > 5000000) {
 		 return new ResponseEntity<String>("Maximum size reached",HttpStatus.OK);		 
 	 }
@@ -225,9 +217,9 @@ public ResponseEntity<?> addComment(Comment comment, long postId, long userId)  
 	Optional<Post> post = postRepo.findById(postId);
 	Optional<User> user = userDao.findById(userId);
 	
-	if(post.isEmpty()) {
+	if(!post.isPresent()) {
 		throw new NotFoundException("Post Not Found !");
-	}else if(user.isEmpty()) {
+	}else if(!user.isPresent()) {
 		throw new NotFoundException("User not found !");
 	}
 	
@@ -240,7 +232,7 @@ public ResponseEntity<?> addComment(Comment comment, long postId, long userId)  
 	cms.add(com);
 	post.get().setComments(cms);
 	commentRepo.save(com);
-	return new ResponseEntity<String>("",HttpStatus.OK);
+	return new ResponseEntity<String>("Comment Added On Post "+postId, HttpStatus.OK);
 	
 }
 
@@ -250,9 +242,9 @@ public ResponseEntity<?> addComment(Comment comment, long postId, long userId)  
 		List<Like> likes = likeDao.findByPostIdAndUserId(postId, userId);
 		Optional<User> user=userDao.findById(userId);
 		Optional<Post> post=postRepo.findById(postId);
-		if(user.isEmpty()) {
+		if(!user.isPresent()) {
 			throw new NotFoundException("User Not Found !");
-		}else if(post.isEmpty()) {
+		}else if(!post.isPresent()) {
 			throw new NotFoundException("Post Not Found !");
 		}
 		 if (likes.isEmpty()) {
@@ -352,8 +344,6 @@ public ResponseEntity<?> addComment(Comment comment, long postId, long userId)  
         friendRequest.get().setStatus(RequestStatus.ACCEPTED);
         friendReqDao.save(friendRequest.get());
     }
-	
-
 	
 	public List<User> getFriends(User user) {
         List<FriendReq> friendRequests = friendReqDao.findByRecieverAndStatus(user, RequestStatus.ACCEPTED);

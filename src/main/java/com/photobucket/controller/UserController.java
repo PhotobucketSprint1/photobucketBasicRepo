@@ -170,8 +170,7 @@ public class UserController {
     
     @PutMapping("/addComment/{postId}/{userId}")
 	public ResponseEntity<?> addComment(@RequestBody Comment comment, @PathVariable long postId, @PathVariable long userId) {
-		userService.addComment(comment, postId, userId);
-		return new ResponseEntity<String>("Comment Added On Post "+postId, HttpStatus.OK);
+		return userService.addComment(comment, postId, userId);
 	}
     
     @PutMapping("/likePost/{postId}/{userId}")

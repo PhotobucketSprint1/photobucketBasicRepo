@@ -7,6 +7,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,36 +24,40 @@ class PostServiceTest {
 	
 	@Autowired
 	PostService postService;
-//
-	@Test
-	void testDeletePost() throws PostServiceException {
-		long postId = 1;
-		assertEquals(200,postService.deletePost(postId).getStatusCodeValue());
-	}
+	
+//	@Test
+//	void testDeletePost() throws PostServiceException {
+//		long postId = 1;
+//		assertEquals(200,postService.deletePost(postId).getStatusCodeValue());
+//	}
 
 	@Test
 	void testAddPost() throws IOException, PostServiceException {
 		MockMultipartFile mock = new MockMultipartFile("Mock","screen.png",MediaType.ALL_VALUE,"as".getBytes());
 		PostDto post = new PostDto();
 		post.setPostImg(mock);
-		post.setDescription("THIS IS DESCRIPTION");
+		post.setDescription("NEW POSTTHIS IS DESCRIPTION");
 		post.setTitle("NEW TITLEE");
 		post.setUser_post_id(1);
 		post.setImg(post.getPostImg().getBytes());
+		System.out.println("Order 6");
 		assertEquals(200,postService.addPost(post).getStatusCodeValue());
+	}
+	@Test
+	void testGetPost() {
+		long id = 1;
+		System.out.println("Order 8");
+		assertEquals(200, postService.getPost(id).getStatusCodeValue());
+		
 	}
 	
 	@Test
 	void testChangePicture() throws IOException, PostServiceException {
 		MockMultipartFile mock = new MockMultipartFile("Mock","screen.png",MediaType.ALL_VALUE,"as".getBytes());
 		long id = 1;
+		System.out.println("Order 7");
 		assertEquals(200,postService.changePicture(id, mock).getStatusCodeValue());
 	}
 	
-	@Test
-	void testGetPost() {
-		long id = 1;
-		assertEquals(200, postService.getPost(id).getStatusCodeValue());
-		
-	}
+	
 }

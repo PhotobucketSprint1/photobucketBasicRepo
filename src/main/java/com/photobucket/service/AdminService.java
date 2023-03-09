@@ -61,7 +61,7 @@ public class AdminService {
 	
 	public ResponseEntity<?> blockUser(UserDto userDto){
 		Optional<User> user = userDao.findById(userDto.getId());
-		if(user.isEmpty()) {
+		if(!user.isPresent()) {
 			throw new NotFoundException("User Not Found !");
 		}
 		user.get().setBlocked(true);
@@ -72,7 +72,7 @@ public class AdminService {
 	
 	public ResponseEntity<?> unblockUser(UserDto userDto){
 		Optional<User> user = userDao.findById(userDto.getId());
-		if(user.isEmpty()) {
+		if(!user.isPresent()) {
 			throw new NotFoundException("User Not Found !");
 		}
 		user.get().setBlocked(false);
@@ -84,7 +84,7 @@ public class AdminService {
 	public ResponseEntity<?> blockComment(CommentDto commentDto){
 		
 		Optional<Comment> comment = commentRepo.findById(commentDto.getId());
-		if(comment.isEmpty()) {
+		if(!comment.isPresent()) {
 			throw new NotFoundException("Comment Not Found !");
 		}
 		comment.get().setBlocked(true);
@@ -95,7 +95,7 @@ public class AdminService {
 	
 	public ResponseEntity<?> unblockComment( CommentDto commentDto){
 		Optional<Comment> comment = commentRepo.findById(commentDto.getId());
-		if(comment.isEmpty()) {
+		if(!comment.isPresent()) {
 			throw new NotFoundException("Comment Not Found !");
 		}
 		comment.get().setBlocked(false);
@@ -106,7 +106,7 @@ public class AdminService {
 	
 	public ResponseEntity<?> blockPost(PostDto postDto){	
 		Optional<Post> post = postRepo.findById(postDto.getId());
-		if(post.isEmpty()) {
+		if(!post.isPresent()) {
 			throw new NotFoundException("Post Not Found !");
 		}
 		post.get().setBlocked(true);
@@ -117,7 +117,7 @@ public class AdminService {
 	
 	public ResponseEntity<?> unblockPost(PostDto postDto){
     	Optional<Post> post = postRepo.findById(postDto.getId());
-    	if(post.isEmpty()) {
+    	if(!post.isPresent()) {
 			throw new NotFoundException("Post Not Found !");
 		}
    		post.get().setBlocked(false);

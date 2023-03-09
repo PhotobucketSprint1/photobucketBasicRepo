@@ -51,7 +51,7 @@ public class PostService {
 	public ResponseEntity<?> deletePost(long id){
 		Optional<Post> post = postRepo.findById(id);
 		
-		if(post.isEmpty()) {
+		if(!post.isPresent()) {
 			throw new NotFoundException("Post Not Found !");
 		}
 		if(post.get().getId()>0) {
@@ -100,14 +100,10 @@ public class PostService {
 		
 		long user_post_id = postDto.getUser_post_id();
 		Optional<User> user = userDao.findById(user_post_id);
-			if(user.isEmpty()) {
+			if(!user.isPresent()) {
 				throw new NotFoundException("User not found !");
 			}
 			
-			if(user.get().isBlocked()) {
-				System.out.println("FROM IN"+user.get().isBlocked());
-				return new ResponseEntity<String>("Admin blocked your profile", HttpStatus.OK);
-			}else {
 				Post post = new Post();
 				
 				if(postDto.getPostImg().isEmpty()) {
@@ -129,13 +125,12 @@ public class PostService {
 				postRepo.save(post);
 				System.out.println("Post Saved !");
 				return new ResponseEntity<String>("Post Saved", HttpStatus.OK);
-			}
 
 	}
 	
 	public ResponseEntity<?> changePicture(long user_id, MultipartFile changeFile) throws IOException, PostServiceException {
 		Optional<Post> post = postRepo.findById(user_id);
-			if(post.isEmpty()) {
+			if(!post.isPresent()) {
 				throw new NotFoundException("Post Not Found !");
 			}else if(changeFile.isEmpty()) {
 				throw new NotFoundException("Please Add Image !");
@@ -149,10 +144,11 @@ public class PostService {
 	}
 	
 	 public List<PostDto> getPostsByUser(long userId) {
-	        User user = userDao.findById(userId).get();
-	        List<Post> posts = user.getPosts();
-	        
-	        
+	        Optional<User> user = userDao.findById(userId);
+	        if(!user.isPresent()) {
+	        	throw new NotFoundException("User Not Found !");
+	        }
+	        List<Post> posts = user.get().getPosts();
 	        
 	        List<PostDto> postDTOs = new ArrayList<>();
 	        for (Post post : posts) {
@@ -169,11 +165,13 @@ public class PostService {
 	    }
 	 
 	 public PostDto getPostImage(long postId) {
-	        Post post = postRepo.findById(postId).get();
-
+	        Optional<Post> post = postRepo.findById(postId);
+	        if(!post.isPresent()) {
+	        	throw new NotFoundException("Post Not Found !");
+	        }
 	        PostDto postDTO = new PostDto();
-	        postDTO.setId(post.getId());
-            postDTO.setImg(post.getImg());
+	        postDTO.setId(post.get().getId());
+            postDTO.setImg(post.get().getImg());
 	        
 	        return postDTO;
 	    }
@@ -181,7 +179,7 @@ public class PostService {
 	
 	public ResponseEntity<?> getPost(long post_id) {
 		Optional<Post> post = postRepo.findById(post_id);
-		if(post.isEmpty()) {
+		if(!post.isPresent()) {
 			throw new NotFoundException("Post not found !");
 		}
 			PostDto postDto = new PostDto();

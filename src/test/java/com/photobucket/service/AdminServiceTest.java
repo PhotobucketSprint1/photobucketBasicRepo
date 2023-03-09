@@ -2,15 +2,20 @@ package com.photobucket.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-
+import java.io.IOException;
 import java.util.Optional;
+import java.util.Random;
 
+import org.aspectj.lang.annotation.Before;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
 
 import com.photobucket.dto.AdminDto;
 import com.photobucket.dto.CommentDto;
@@ -40,15 +45,46 @@ class AdminServiceTest {
 	UserDao userDao;
 	
 	@Autowired
+	PostService postService;
+	
+	@Autowired
 	CommentDao commentDao;
 	
 	@Autowired
 	PostDao postDao;
 	
+	
+//	@Test
+	@Before(value = "")
+	void createUserForTest() throws IOException {
+		MockMultipartFile mock = new MockMultipartFile("Mock","screen.png",MediaType.ALL_VALUE,"as".getBytes());
+		UserDto user = new UserDto();
+		Random rand = new Random();
+		int randomNumber = rand.nextInt(101);
+		user.setUserName("Venom"+randomNumber);
+		user.setEmailId("venom"+randomNumber+"@gmail.com");
+		user.setPassword("123");
+		user.setRole("User");
+		user.setProfilePicture(mock);
+		userService.createUser(user);
+		
+		
+		MockMultipartFile mock1 = new MockMultipartFile("Mock","screen.png",MediaType.ALL_VALUE,"as".getBytes());
+		PostDto post = new PostDto();
+		post.setPostImg(mock1);
+		post.setDescription("THIS IS DESCRIPTION");
+		post.setTitle("NEW TITLEE");
+		post.setUser_post_id(2);
+		post.setImg(post.getPostImg().getBytes());
+		postService.addPost(post);
+		
+		
+	}
+	
 	@Test
 	void testBlockUser() {
 		 UserDto userDto = new UserDto();
-		    userDto.setId(2);
+		    userDto.setId(1);
 		    assertEquals(200, adminService.blockUser(userDto).getStatusCodeValue());
 	}
 
@@ -63,13 +99,14 @@ class AdminServiceTest {
 	void testBlockPost() {
 		PostDto postDto = new PostDto();
         postDto.setId((long)1);
+        System.out.println("order 1");
         assertEquals(200, adminService.blockPost(postDto).getStatusCodeValue());
 	}
 
 	@Test
 	void testUnblockUser() {
 		UserDto userDto = new UserDto();
-        userDto.setId(1);
+        userDto.setId((long)1);
         assertEquals(200, adminService.unblockUser(userDto).getStatusCodeValue());
 	}
 
@@ -81,10 +118,10 @@ class AdminServiceTest {
 	}
 
 	@Test
-	void testUnblockPost() {
+	void testUnblockPost() throws IOException {
 		 PostDto postDto = new PostDto();
-		 postDto.setId((long) 1);
-	     assertEquals(200,adminService.unblockPost(postDto).getStatusCodeValue() );
+		 postDto.setId((long)1);
+	     assertEquals(200,adminService.unblockPost(postDto).getStatusCodeValue());
 	}
 
 	@Test
@@ -110,9 +147,11 @@ class AdminServiceTest {
 	@Test
 	void testCreateAdmin() throws Exception {
 		AdminDto adminDto=new AdminDto();
-		adminDto.setUsername("newAdmin");
-		adminDto.setPassword("ani");
-		adminDto.setEmail_id("newAd@gmail.com");
+		Random rand = new Random();
+		int randomNumber = rand.nextInt(101);
+		adminDto.setUsername("takeadmin"+randomNumber);
+		adminDto.setPassword("take");
+		adminDto.setEmail_id("take"+randomNumber+"@gmail.com");
 		String result=adminService.createAdmin(adminDto);
 		assertEquals("Admin added successfully",result);
 	}
